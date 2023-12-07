@@ -2,27 +2,9 @@ package dev.morj.adv23.day07
 
 @Suppress("MemberVisibilityCanBePrivate")
 object Main2 {
-    val normies = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2')
-    val deck = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J')
+    val replacements = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2')
+    val deck = replacements + 'J'
     val powers = deck.reversed().mapIndexed { index, c -> c to index }.toMap()
-
-    class Hand(val rank: Int, val bid: Long, val cards: CharArray, val best: CharArray) : Comparable<Hand> {
-        override fun toString(): String {
-            return "Hand {${best.sortedArray().joinToString("")}, $rank, $bid, source: ${cards.sortedArray().joinToString("")}}"
-        }
-
-        override fun compareTo(other: Hand): Int {
-            if (rank != other.rank) return rank.compareTo(other.rank)
-            (0..<5).forEach {
-                val our = powers[cards[it]]!!
-                val their = powers[other.cards[it]]!!
-                if (our != their) {
-                    return our.compareTo(their)
-                }
-            }
-            return 0
-        }
-    }
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -33,13 +15,9 @@ object Main2 {
             // println("hand ${hand.joinToString()}, bid: $bid")
             var maxRank = -1
             var bestHand = sourceHand
-            normies.forEach { replacement ->
-                val hand = sourceHand.map {
-                    if (it == 'J') {
-                        replacement
-                    } else {
-                        it
-                    }
+            replacements.forEach {
+                val hand = sourceHand.map { char ->
+                    it.takeIf { char == 'J' } ?: char
                 }.toCharArray().sortedArray()
                 val newRank = rankOf(hand)
                 if (newRank > maxRank) {
@@ -73,15 +51,28 @@ object Main2 {
     val CharArray.fourOfAKind: Boolean get() = this[0] == this[3] || this[1] == this[4]
     val CharArray.triple: Boolean get() = this[0] == this[2] || this[1] == this[3] || this[2] == this[4]
     val CharArray.pairs: Int
-        get() {
-            var result = 0
-            this.toList().zipWithNext { a, b -> if (a == b) result++ }
-            return result
-        }
+        get() = toList().zipWithNext().fold(0) { acc, p -> if (p.first == p.second) acc + 1 else acc }
     val CharArray.fullHouse: Boolean get() = pairs == 3
     val CharArray.twoPairs: Boolean get() = pairs == 2
     val CharArray.onePair: Boolean get() = pairs == 1
 
+    private class Hand(val rank: Int, val bid: Long, val cards: CharArray, val best: CharArray) : Comparable<Hand> {
+        override fun toString(): String {
+            return "Hand {${best.sortedString}, $rank, $bid, source: ${cards.sortedString}}"
+        }
+
+        override fun compareTo(other: Hand): Int {
+            if (rank != other.rank) return rank.compareTo(other.rank)
+            cards.zip(other.cards).forEach { (a, b) ->
+                if (a != b) {
+                    return powers[a]!!.compareTo(powers[b]!!)
+                }
+            }
+            return 0
+        }
+    }
+
+    val CharArray.sortedString: String get() = sortedArray().joinToString("")
 
     private fun consumeInput(action: (Int, String) -> Unit) {
         javaClass.classLoader.getResource("day-07.txt")!!.openStream().use { stream ->

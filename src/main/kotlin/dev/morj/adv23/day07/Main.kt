@@ -59,15 +59,10 @@ object Main {
     val CharArray.fourOfAKind: Boolean get() = this[0] == this[3] || this[1] == this[4]
     val CharArray.triple: Boolean get() = this[0] == this[2] || this[1] == this[3] || this[2] == this[4]
     val CharArray.pairs: Int
-        get() {
-            var result = 0
-            this.toList().zipWithNext { a, b -> if (a == b) result++ }
-            return result
-        }
+        get() = toList().zipWithNext().fold(0) { acc, p -> if (p.first == p.second) acc + 1 else acc }
     val CharArray.fullHouse: Boolean get() = pairs == 3
     val CharArray.twoPairs: Boolean get() = pairs == 2
     val CharArray.onePair: Boolean get() = pairs == 1
-
 
     private fun consumeInput(action: (Int, String) -> Unit) {
         javaClass.classLoader.getResource("day-07.txt")!!.openStream().use { stream ->
