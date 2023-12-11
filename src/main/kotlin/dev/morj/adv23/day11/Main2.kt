@@ -33,10 +33,7 @@ object Main2 {
                 }
             }
         }
-        var tmp1 = 0
-        val emptyColCount = emptyCol.map { if (it) tmp1++ else tmp1 }
-        tmp1 = 0
-        val emptyRowCount = emptyRow.map { if (it) tmp1++ else tmp1 }
+        val (emptyColCount, emptyRowCount) = expandSpace(emptyCol, emptyRow)
         println(emptyColCount.joinToString())
         println(emptyRowCount.joinToString())
         stars = stars.map {
@@ -50,7 +47,7 @@ object Main2 {
                     pairs++
                     val dist = dist(a, b)
                     sum += dist
-                    println("from $a to $b is $dist")
+                    // println("from $a to $b is $dist")
                 }
             }
         }
@@ -59,6 +56,13 @@ object Main2 {
 
     private fun dist(a: Pair<Int, Int>, b: Pair<Int, Int>): Int {
         return abs(a.first - b.first) + abs(a.second - b.second)
+    }
+
+    private fun expandSpace(emptyCol: MutableList<Boolean>, emptyRow: MutableList<Boolean>): Pair<List<Int>, List<Int>> {
+        var tmp1 = 0 // no fold + map in Kotlin, or am I missing it?
+        val emptyColCount = emptyCol.map { if (it) tmp1++ else tmp1 }
+        tmp1 = 0
+        return Pair(emptyColCount, emptyRow.map { if (it) tmp1++ else tmp1 })
     }
 
     private fun consumeInput(action: (Int, String) -> Unit) {
