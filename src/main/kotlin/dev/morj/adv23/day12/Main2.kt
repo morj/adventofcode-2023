@@ -13,7 +13,7 @@ object Main2 {
             val g = tokens.last().split(',').map { it.toInt() }
             val groups = g + g + g + g + g
             // val groups = g
-            val sum = gen(mutableMapOf(), ArrayList(groups.size), groups, springs, 0, springs.size)
+            val sum = gen(hashMapOf(), ArrayList(groups.size), groups, springs, 0, springs.size)
             println("line ${index + 1}, sum: $sum")
             result += sum
         }
@@ -27,7 +27,7 @@ object Main2 {
         var result = 0L
         var finish = size
         for (index in (start..<size)) {
-            if (springs[index] == '#') {
+            if (springs[index] == '#') { // hint: can be pre-calculated
                 finish = index
                 break
             }
