@@ -11,7 +11,7 @@ object Main {
             data.add(line.toCharArray().toMutableList())
         }
         // summarize(data, part1(data))
-        part2(data)
+        summarize(data, part2(data))
     }
 
     private fun part1(data: MutableList<MutableList<Char>>): MutableList<Rock> {
@@ -23,10 +23,10 @@ object Main {
         return rocks
     }
 
-    private fun part2(data: MutableList<MutableList<Char>>): Int {
+    private fun part2(data: MutableList<MutableList<Char>>): List<Rock> {
         val rocks = findRocks(data)
-        val steps = mutableMapOf<Int, List<Rock>>()
-        val fingerprints = mutableMapOf<String, Pair<Int, List<Rock>>>()
+        val history = mutableMapOf<Int, List<Rock>>()
+        val fingerprints = mutableMapOf<String, Int>()
         (1..REP).forEach { step ->
             rocks.sortBy { it.x }
             rocks.forEach { it.moveNorth(data) }
@@ -37,20 +37,16 @@ object Main {
             rocks.sortByDescending { it.y }
             rocks.forEach { it.moveEast(data) }
             val fingerprint = fingerprint(rocks)
-            fingerprints[fingerprint]?.let { prevStep ->
-                if (rocks == prevStep.second) {
-                    println("step $step matches step ${prevStep.first}")
-                    val base = prevStep.first
-                    val len = step - base
-                    val offset = (REP_MAX - base) % len
-                    summarize(data, steps[base + offset]!!)
-                    return step
-                }
-            } ?: run {
+            val prev = fingerprints[fingerprint]
+            if (prev != null && rocks == history[prev]) {
+                println("step $step matches step $prev")
+                val len = step - prev
+                val offset = (REP_MAX - prev) % len
+                return history[prev + offset]!!
+            } else {
                 // println(fingerprint)
-                val copy = rocks.map { Rock(it.x, it.y) }
-                steps[step] = copy
-                fingerprints[fingerprint] = step to copy
+                history[step] = rocks.map { Rock(it.x, it.y) }
+                fingerprints[fingerprint] = step
             }
             // debug(data)
             summarize(data, rocks)
