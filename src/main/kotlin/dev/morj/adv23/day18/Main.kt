@@ -14,6 +14,7 @@ object Main {
         dfs(data, 180, 180)
         print(data)
         println("total: ${count(data)}")
+        println("perimeter: ${count(data, '#')}")
     }
 
     private fun computeInstructions(): MutableList<Inst> {
