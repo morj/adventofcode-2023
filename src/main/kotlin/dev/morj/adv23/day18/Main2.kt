@@ -65,7 +65,6 @@ object Main2 {
         val data = arrayListOf<Line>()
         var x = startX
         var y = startY
-        // var prev = Line.H(0, 0, 0, 0, Dir.R)
         instructions.forEachIndexed { i, it ->
             val l = it.length
             when (it.dir) {
@@ -80,16 +79,12 @@ object Main2 {
                 }
 
                 Dir.L -> {
-                    val line = Line.H(i, x, y - l, y, it.dir)
-                    // prev = line
-                    data.add(line)
+                    data.add(Line.H(i, x, y - l, y, it.dir))
                     y -= l
                 }
 
                 Dir.R -> {
-                    val line = Line.H(i, x, y, y + l, it.dir)
-                    // prev = line
-                    data.add(line)
+                    data.add(Line.H(i, x, y, y + l, it.dir))
                     y += l
                 }
             }
