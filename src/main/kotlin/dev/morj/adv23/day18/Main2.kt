@@ -22,16 +22,8 @@ object Main2 {
             }
             val steps = (opp.map { it.x1 } + opp.map { it.x2 }).distinct().sorted()
             var sum = 0L
-            var x1 = if (all[i - 1].dir == Dir.R) {
-                x + 1
-            } else {
-                x
-            }
-            val end = if (all[i + 1].dir == Dir.L) {
-                x2
-            } else {
-                x2 + 1
-            }
+            var x1 = if (all[i - 1].dir == Dir.R) x + 1 else x
+            val end = if (all[i + 1].dir == Dir.L) x2 else x2 + 1
             while (x1 < end) {
                 val prev = x1
                 val next = steps.firstOrNull { it >= x1 }?.coerceAtMost(end) ?: end
