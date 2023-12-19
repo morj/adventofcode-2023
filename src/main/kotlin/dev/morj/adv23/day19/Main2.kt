@@ -70,24 +70,14 @@ object Main2 {
                                 }
                             }
                         }
-                        val action1 = rule.test(part)
-                        val action2 = split?.let {
-                            requireNotNull(rule.test(it)) // must match by definition
+                        split?.let {
+                            // must match by definition
+                            requireNotNull(rule.test(it)).doApply(it, accepted, newState)
                         }
-                        if (action2 != null) {
-                            when (action2) {
-                                Action.A -> accepted.add(split!!)
-                                Action.R -> Unit // ignore part
-                                is Action.Send -> send(newState, action2.targetId, split!!)
-                            }
-                        }
-                        if (action1 != null) {
-                            when (action1) {
-                                Action.A -> accepted.add(part)
-                                Action.R -> Unit // ignore part
-                                is Action.Send -> send(newState, action1.targetId, part)
-                            }
-                            break // nothing remains
+                        val action = rule.test(part)
+                        if (action != null) {
+                            action.doApply(part, accepted, newState)
+                            break // nothing remains by definition
                         }
                     }
                 }
@@ -133,9 +123,25 @@ object Main2 {
     class Workflow(val id: String, val rules: List<Rule>)
 
     sealed class Action {
-        data object A : Action()
-        data object R : Action()
-        data class Send(val targetId: String) : Action()
+        abstract fun doApply(part: Part, accepted: MutableSet<Part>, s: MutableMap<String, MutableList<Part>>)
+
+        data object A : Action() {
+            override fun doApply(part: Part, accepted: MutableSet<Part>, s: MutableMap<String, MutableList<Part>>) {
+                accepted.add(part)
+            }
+        }
+
+        data object R : Action() {
+            override fun doApply(part: Part, accepted: MutableSet<Part>, s: MutableMap<String, MutableList<Part>>) {
+                // ignore part
+            }
+        }
+
+        data class Send(val targetId: String) : Action() {
+            override fun doApply(part: Part, accepted: MutableSet<Part>, s: MutableMap<String, MutableList<Part>>) {
+                send(s, targetId, part)
+            }
+        }
     }
 
     data class Rule(val target: Char?, val sign: Boolean, val limit: Int, val action: Action) {
