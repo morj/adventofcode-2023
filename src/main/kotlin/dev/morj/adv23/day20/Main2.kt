@@ -7,12 +7,10 @@ object Main2 {
         val broadcast = mutableListOf<String>()
         val gates = mutableMapOf<String, Gate>()
         val names = mutableListOf<String>()
-        var start = 0
-        consumeInput { index, line ->
+        consumeInput { _, line ->
             val tokens = line.split(" -> ")
             val g = tokens[0]
             if (g == "broadcaster") {
-                start = index
                 broadcast.addAll(tokens[1].split(", "))
             } else {
                 val type = g[0] == '%'
@@ -105,8 +103,6 @@ object Main2 {
     enum class Pulse(val id: String) { LOW("low"), HIGH("high") }
 
     data class Gate(val name: String, val type: Boolean, val targets: List<String>)
-
-    data class Flop(val name: String, val input: String)
 
     data class Conj(val name: String, val inputs: List<String>)
 
