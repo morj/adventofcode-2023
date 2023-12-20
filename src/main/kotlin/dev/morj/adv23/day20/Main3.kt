@@ -47,23 +47,18 @@ object Main3 {
         }
         gates.forEach { println(it) }
         conjs.forEach { println(it) }
-
         val currentFlops = mutableSetOf<String>()
         val currentConjInputs = mutableMapOf<String, MutableMap<String, Pulse>>()
         conjs.forEach { (k, c) ->
             currentConjInputs[k] = c.inputs.associateWith { Pulse.LOW }.toMutableMap()
         }
-        var highs = 0L
-        var lows = 0L
         var totalSteps = 0L
         var desired = Pulse.LOW
         var test = 0
         while (totalSteps < Long.MAX_VALUE) {
             totalSteps++
-            lows++
             val queue = ArrayDeque<Signal>()
             broadcast.forEach {
-                lows++
                 queue.add(Signal("broadcaster", it, Pulse.LOW))
             }
             while (queue.isNotEmpty()) {
@@ -79,39 +74,27 @@ object Main3 {
                     if (gate.type) {
                         if (pulse == Pulse.LOW) {
                             if (!currentFlops.contains(name)) {
-                                gate.targets.forEach { target ->
-                                    highs++
-                                    queue.add(Signal(name, target, Pulse.HIGH))
-                                }
                                 currentFlops.add(name)
+                                Pulse.HIGH
                             } else {
                                 currentFlops.remove(name)
-                                gate.targets.forEach { target ->
-                                    lows++
-                                    queue.add(Signal(name, target, Pulse.LOW))
-                                }
+                                Pulse.LOW
                             }
+                        } else {
+                            null
                         }
                     } else {
                         val inputs = currentConjInputs[name]!!
                         inputs[from] = pulse
-                        if (inputs.values.all { it == Pulse.HIGH }) {
-                            gate.targets.forEach {
-                                lows++
-                                queue.add(Signal(name, it, Pulse.LOW))
-                            }
-                        } else {
-                            gate.targets.forEach {
-                                highs++
-                                queue.add(Signal(name, it, Pulse.HIGH))
-                            }
+                        if (inputs.values.all { it == Pulse.HIGH }) Pulse.LOW else Pulse.HIGH
+                    }?.let {
+                        gate.targets.forEach { target ->
+                            queue.add(Signal(name, target, it))
                         }
                     }
                 }
             }
         }
-        println("FAIL lows $lows, highs: $highs")
-        println("FAIL result ${lows * highs}")
         return -1
     }
 
