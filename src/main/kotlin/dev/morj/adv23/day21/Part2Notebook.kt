@@ -14,7 +14,7 @@ object Part2Notebook {
         // 1 -> 33366   4
         // 2 -> 92548   9
         // 3 -> 181276
-        var data = arrayListOf(3730, 33366, 92548, 181276)
+        val data = arrayListOf(3730, 33366, 92548, 181276)
         val q = mutableListOf<Int>()
         for (n in (0..4)) {
             println((14773 * n * n) + (14863 * n) + 3730)
@@ -53,14 +53,5 @@ object Part2Notebook {
     private fun bar() {
         val n = 202300L
         println((14773 * n * n) + (14863 * n) + 3730)
-    }
-    private fun consumeInput(action: (Int, String) -> Unit) {
-        javaClass.classLoader.getResource("day-21.txt")!!.openStream().use { stream ->
-            var index = 0
-            stream.bufferedReader().forEachLine {
-                action(index, it)
-                index++
-            }
-        }
     }
 }

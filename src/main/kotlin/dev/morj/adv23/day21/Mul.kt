@@ -3,14 +3,14 @@ package dev.morj.adv23.day21
 import java.io.File
 
 object Mul {
-    const val REP_X = 9
-    const val REP_Y = 9
+    private const val REP_X = 9
+    private const val REP_Y = 9
 
     @JvmStatic
     fun main(args: Array<String>) {
         File("day-239.txt").printWriter().use { pw ->
             repeat(REP_Y / 2) {
-                consumeInput { x, line ->
+                consumeInput { _, line ->
                     val r = line.replace('S', '.')
                     repeat(REP_X) {
                         pw.print(r)
@@ -18,7 +18,7 @@ object Mul {
                     pw.println()
                 }
             }
-            consumeInput { x, line ->
+            consumeInput { _, line ->
                 val r = line.replace('S', '.')
                 repeat(REP_X / 2) {
                     pw.print(r)
@@ -30,7 +30,7 @@ object Mul {
                 pw.println()
             }
             repeat(REP_Y / 2) {
-                consumeInput { x, line ->
+                consumeInput { _, line ->
                     val r = line.replace('S', '.')
                     repeat(REP_X) {
                         pw.print(r)
