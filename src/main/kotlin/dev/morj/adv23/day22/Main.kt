@@ -19,8 +19,54 @@ object Main {
             bricks.add(brick)
         }
         println("width $width height $height")
-        val layers = mutableListOf<MutableMap<LayerPoint, Brick>>()
         bricks.sortBy { it.z1 }
+        val layers = mutableListOf<MutableMap<LayerPoint, Brick>>()
+        // layoutBricks(bricks, layers)
+        processBricks(bricks, layers) // compute initial Z values
+        var result = 0L
+        for (brick in bricks) {
+            val source = bricks.filter { it != brick }
+            val updated = source.map { it.copy() }
+            layoutBricks(updated, mutableListOf())
+            var fall = 0
+            source.forEachIndexed { index, candidate ->
+                if (updated[index].realZ != candidate.realZ) {
+                    fall++
+                }
+            }
+            println("brick ${brick.id} will cause $fall bricks to fall")
+            result += fall
+        }
+        println(result)
+    }
+
+    private fun processBricks(bricks: List<Brick>, layers: MutableList<MutableMap<LayerPoint, Brick>>) {
+        layoutBricks(bricks, layers)
+        val supportedBy = bricks.associateWith { supportedBy(layers, it) }
+        bricks.forEach { brick ->
+            println("$brick ${brick.axis} supported by ${supportedBy[brick]?.joinToString { it.id.toString() }}")
+        }
+        val supports = mutableMapOf<Brick, MutableSet<Brick>>()
+        supportedBy.forEach { (brick, sup) ->
+            sup.forEach { support ->
+                supports[support]?.add(brick) ?: run {
+                    supports[support] = mutableSetOf(brick)
+                }
+            }
+        }
+        var result = 0
+        bricks.forEach { brick ->
+            val ourSupports = supports[brick]
+            if (ourSupports.isNullOrEmpty() || ourSupports.all { supportedBy[it]!!.size > 1 }) {
+                println("can be disintegrated: ${brick.id}")
+                result++
+            }
+            println("$brick ${brick.axis} supports ${ourSupports?.joinToString { it.id.toString() }}")
+        }
+        println("disintegration total: $result")
+    }
+
+    private fun layoutBricks(bricks: List<Brick>, layers: MutableList<MutableMap<LayerPoint, Brick>>) {
         bricks.forEach { brick ->
             val axis = brick.axis
             val points = brick.points
@@ -52,28 +98,6 @@ object Main {
                 layers[z][LayerPoint(it.x, it.y)] = brick
             }
         }
-        val supportedBy = bricks.associateWith { supportedBy(layers, it) }
-        /*bricks.forEach { brick ->
-            println("$brick ${brick.axis} supported by ${supportedBy[brick]?.joinToString { it.id.toString() }}")
-        }*/
-        val supports = mutableMapOf<Brick, MutableSet<Brick>>()
-        supportedBy.forEach { (brick, sup) ->
-            sup.forEach { support ->
-                supports[support]?.add(brick) ?: run {
-                    supports[support] = mutableSetOf(brick)
-                }
-            }
-        }
-        var result = 0
-        bricks.forEach { brick ->
-            val ourSupports = supports[brick]
-            if (ourSupports.isNullOrEmpty() || ourSupports.all { supportedBy[it]!!.size > 1 }) {
-                println("can be removed: ${brick.id}")
-                result++
-            }
-            println("$brick ${brick.axis} supports ${ourSupports?.joinToString { it.id.toString() }}")
-        }
-        println("can be removed: $result")
     }
 
     private fun supportedBy(layers: MutableList<MutableMap<LayerPoint, Brick>>, brick: Brick): Collection<Brick> {
