@@ -6,7 +6,6 @@ import kotlin.math.roundToLong
 object Main2 {
     private const val A = 'A'.code
     private const val EPSILON = 1e-10
-    private const val EPSILON_ROUGH = 1e-1
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -19,22 +18,22 @@ object Main2 {
         }
         val reFramed = reFrame(input, input[0])
         val direction = findDirection(reFramed)
-        val start = input[0].p1 - direction * (2 * 10673400863.toDouble())
+        val start = input[0].p1
         println("direction $direction")
         val intersections = reFramed.filter { it !== reFramed[0] }.map { other ->
             val (tStart, tOther) = intersect(start, direction, other.p1, other.v)
             val int1 = start + direction * tStart
             val int2 = other.p1 + other.v * tOther
             require((int2 - int1).isSmall) // sanity check
-            other to tOther.roundToLong()
+            other to tOther.roundToLong().toDouble() // round
         }.sortedBy { it.second }
         val (h0, t0) = intersections[77]
         val (h1, t1) = intersections[78]
-        val target0 = h0.p1 + h0.v * t0.toDouble()
-        val distance = (h1.p1 + h1.v * t1.toDouble()) - target0
-        val speed = distance / (t1 - t0).toDouble()
+        val target0 = h0.p1 + h0.v * t0
+        val distance = (h1.p1 + h1.v * t1) - target0
+        val speed = distance / (t1 - t0)
         println("speed: $speed")
-        val actualStart = target0 - speed * t0.toDouble()
+        val actualStart = target0 - speed * t0
         println("actual start: $actualStart")
         val x = actualStart.x.roundToLong()
         val y = actualStart.y.roundToLong()
@@ -57,11 +56,10 @@ object Main2 {
     }
 
     private fun reFrame(input: MutableList<Hailstone>, reference: Hailstone): List<Hailstone> {
-        // change the frame of reference
-        val stones = input.map {
+        return input.map {
+            // change the frame of reference
             it.copy(vx = it.vx - reference.vx, vy = it.vy - reference.vy, vz = it.vz - reference.vz)
         }
-        return stones
     }
 
     // https://paulbourke.net/geometry/pointlineplane/
@@ -86,8 +84,8 @@ object Main2 {
 
         val t1 = abs(mua - mua.roundToLong())
         val t2 = abs(mub - mub.roundToLong())
-        require(t1 < EPSILON_ROUGH)
-        require(t2 < EPSILON_ROUGH)
+        require(t1 < 1e-1) // sanity check
+        require(t2 < 1e-1) // sanity check
 
         return mua to mub
     }
