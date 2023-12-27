@@ -53,7 +53,7 @@ object Main2 {
         println(lcm(periods.toLongArray()))
     }
 
-    private fun gcd(x: Long, y: Long): Long {
+    private tailrec fun gcd(x: Long, y: Long): Long {
         return if (y == 0L) x else gcd(y, x % y)
     }
 
