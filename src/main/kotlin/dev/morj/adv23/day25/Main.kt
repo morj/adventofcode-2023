@@ -22,7 +22,7 @@ object Main {
         }
         val totalPaths = mutableMapOf<Pair<String, String>, Int>()
         allEdgesSet.forEach { (from, to) ->
-            totalPaths[from to to] = 1 + dfs(from, to, mutableSetOf(), edges)
+            totalPaths[from to to] = countUniquePaths(from, to, mutableSetOf(), edges)
             // println("===========")
         }
         println("total ${totalPaths.size}")
@@ -39,7 +39,7 @@ object Main {
                 val removed = mutableSetOf(e1, e2)
                 edges.keys.forEach { v ->
                     if (!visited.contains(v)) {
-                        dfs(v, timer, removed, tin, low, visited, edges)
+                        findBridge(v, timer, removed, tin, low, visited, edges)
                     }
                 }
             }
@@ -47,28 +47,25 @@ object Main {
     }
 
     // approximation
-    private fun dfs(
+    private fun countUniquePaths(
         start: String,
         finish: String,
         visited: MutableSet<String>,
         edges: MutableMap<String, MutableSet<String>>
     ): Int {
         visited.add(start)
-        var sum = 0
+        var sum = 1
         val usedEdges = mutableSetOf<Pair<String, String>>()
         edges[start]!!.forEach { to ->
             if (!visited.contains(to)) {
-                val path = dfs(to, finish, visited, listOf(start, to), usedEdges, edges)
-                if (path != null) {
-
-                    sum++
-                }
+                val path = findUniquePaths(to, finish, visited, listOf(start, to), usedEdges, edges)
+                if (path != null) sum++
             }
         }
         return sum
     }
 
-    private fun dfs(
+    private fun findUniquePaths(
         current: String,
         finish: String,
         visited: MutableSet<String>,
@@ -86,7 +83,7 @@ object Main {
         visited.add(current)
         edges[current]!!.forEach { to ->
             if (!visited.contains(to) && !usedEdges.contains(current to to)) {
-                dfs(to, finish, visited, p + to, usedEdges, edges)?.let {
+                findUniquePaths(to, finish, visited, p + to, usedEdges, edges)?.let {
                     return it
                 }
             }
@@ -94,7 +91,7 @@ object Main {
         return null
     }
 
-    private fun dfs(
+    private fun findBridge(
         v: String,
         timer: AtomicInteger,
         removed: MutableSet<Pair<String, String>>,
@@ -113,7 +110,7 @@ object Main {
             if (visited.contains(to)) {
                 low[v] = min(low[v] ?: 0, timeIn[to] ?: 0)
             } else {
-                dfs(to, timer, removed, timeIn, low, visited, edges, v)?.let {
+                findBridge(to, timer, removed, timeIn, low, visited, edges, v)?.let {
                     return it
                 }
                 low[v] = min(low[v] ?: 0, low[to] ?: 0)
