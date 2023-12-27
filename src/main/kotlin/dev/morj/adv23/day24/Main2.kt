@@ -33,11 +33,9 @@ object Main2 {
         val distance = (h1.p1 + h1.v * t1) - target0
         val speed = distance / (t1 - t0)
         println("speed: $speed")
-        val actualStart = target0 - speed * t0
+        val actualStart = (target0 - speed * t0).roundToLong()
         println("actual start: $actualStart")
-        val x = actualStart.x.roundToLong()
-        val y = actualStart.y.roundToLong()
-        val z = actualStart.z.roundToLong()
+        val (x, y, z) = actualStart
         println(x + y + z)
     }
 
@@ -118,6 +116,7 @@ object Main2 {
 
         val isZero: Boolean get() = abs(x) < EPSILON && abs(y) < EPSILON && abs(z) < EPSILON
         val isSmall: Boolean get() = abs(x) < 1 && abs(y) < 1 && abs(z) < 1
+        fun roundToLong() = Triple(x.roundToLong(), y.roundToLong(), z.roundToLong())
     }
 
     private fun dot(a: V, b: V): Double {
